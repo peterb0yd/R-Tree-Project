@@ -1,3 +1,5 @@
+package com.rtree;
+
 import processing.core.PApplet;
 
 public class RTree_GUI extends PApplet {
