@@ -16,10 +16,13 @@ public class GUI extends PApplet {
 
 	public void setup() {
 		rectList = new ArrayList<Rectangle>();
-
 		algo = new Algorithm(rectList);
+		
+		// Window
 		size(640, 360);
 		background(250, 250, 250, 250);
+		
+		// Text
 		textFont(createFont("Georgia", 36));
 		textSize(36);
 		fill(0, 0, 0, 100);
@@ -27,22 +30,23 @@ public class GUI extends PApplet {
 	}
 
 	public void draw() {
+		
+		// Each rectangle
 		for (Rectangle rect : rectList) {
 			rect(rect.x, rect.y, 50, 50);
 		}
 	}
 
 	public void mousePressed() {
-		if (count < 1) {
+		if (count < 1) 
 			count++;
 			background(250, 250, 250, 250);
-		}
-		if (mousePressed) {
-			addRect(mouseX, mouseY, 60, 60);
 			
-//			ellipse(mouseX-10, mouseY-10, 5, 5);
+		if (mousePressed) 
+			addRect(mouseX, mouseY, 60, 60);		// add rectangle
+//			ellipse(mouseX-10, mouseY-10, 5, 5);	// draw circle (for points)
 			fill(0, 0, 15, 100);
-		}
+		
 	}
 	
 	public void addRect(float x, float y, float w, float h) {
@@ -53,6 +57,7 @@ public class GUI extends PApplet {
 		rectangle.height = (int) h;
 		rectList.add(rectangle);
 		
+		// Sends Rectangle List to Algorithm
 		algo.setRectList(rectList);
 	}
 	

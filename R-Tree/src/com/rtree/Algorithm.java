@@ -11,10 +11,6 @@ public class Algorithm {
 		this.rectList = rectList;
 	}
 	
-	public void main (String[] args) {
-		GUI.rectList = rectList;
-	}
-	
 	public ArrayList<Rectangle> getRectList() {
 		return rectList;
 	}
