@@ -22,27 +22,18 @@ public class GUI extends PApplet {
 	boolean deleteClicked = false;
 	boolean enterClicked = false;
 	boolean searchDone = false;
-<<<<<<< HEAD
 	boolean enterDone = false;
-=======
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 	Color regColor = new Color(20, 20, 20, 255);
 	Color pressedColor = new Color(250, 50, 50, 255);
 	Color insertColor = new Color(1);
 	Color searchColor = new Color(1);
 	Color deleteColor = new Color(1);
-<<<<<<< HEAD
 	Color enterColor = new Color(1);
-=======
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 	int panelX = 580;
 	int insertY = 100;
 	int searchY = 200;
 	int deleteY = 300; 
-<<<<<<< HEAD
 	int enterY = 400;
-=======
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 	int buttonWidth = 150;
 	int buttonHeight = 50;
 	int contX = 20;
@@ -65,11 +56,7 @@ public class GUI extends PApplet {
 	int searchRectHeight;
 	
 	//keeps track of current mode
-<<<<<<< HEAD
 	public static enum Mode {start, insert, delete, search, enter};
-=======
-	public static enum Mode {start, insert, delete, search};
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 	Mode mode;
 	
 	public void setup() {
@@ -99,22 +86,15 @@ public class GUI extends PApplet {
 		rect(panelX, searchY, buttonWidth, buttonHeight);
 		fill(deleteColor.getRGB(), 255);
 		rect(panelX, deleteY, buttonWidth, buttonHeight);
-<<<<<<< HEAD
 		fill(enterColor.getRGB(), 255);
 		rect(panelX, enterY, buttonWidth, buttonHeight);
 		
-=======
-	
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 		// Button Text
 		fill(240, 245, 245, 255);
 		text(insert, panelX+45, insertY+30);
 		text(search, panelX+45, searchY+30);
 		text(delete, panelX+45, deleteY+30);
-<<<<<<< HEAD
 		text(enter, panelX+45, enterY+30);
-=======
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 		
 		// If not searching, draw all points
 		if (mode != mode.search) {
@@ -123,12 +103,9 @@ public class GUI extends PApplet {
 				fill(0, 0, 15, 100);
 				ellipse(p.x, p.y, 5, 5);
 			}
-<<<<<<< HEAD
 			for (Rectangle r: drawRectangleList){
 				drawRect(r);
 			}
-=======
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 			noFill();
 			for (Rectangle r: rectList)
 				drawRect(r);
@@ -162,12 +139,9 @@ public class GUI extends PApplet {
 		if (deleteClicked(mouseX, mouseY)) {
 			mode = mode.delete;
 		} 
-<<<<<<< HEAD
 		if (enterClicked(mouseX, mouseY)) {
 			mode = mode.enter;
 		} 
-=======
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 		
 		// What to do based on mode
 		modeBehavior(); 
@@ -177,15 +151,11 @@ public class GUI extends PApplet {
 		insertColor = regColor;
 		searchColor = regColor;
 		deleteColor = regColor;
-<<<<<<< HEAD
 		enterColor = regColor;
-=======
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 		
 		if (mode == mode.search) {
 			searchDone = true;
 		}
-<<<<<<< HEAD
 	}
 	
 	public void mouseDragged() {
@@ -200,29 +170,12 @@ public class GUI extends PApplet {
 		}
 	}
 	
-=======
-	}
-	
-	public void mouseDragged() {
-		if (mode == mode.search) {	// Set bounds for search rectangle
-			if (contains(mouseX, mouseY, contX, contY, contWidth, contHeight)) {
-				Point p1 = new Point(searchRectX, searchRectY);
-				Point p2 = new Point(mouseX, mouseY);
-				searchRectWidth = p2.x - p1.x;
-				searchRectHeight = p2.y - p1.y;
-				searchSpace = new Rectangle(p1, p2, 0, null);
-			}
-		}
-	}
-	
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 	// Checks mode and applies actions
 	private void modeBehavior() {	
 		switch (mode)	{
 			case insert:
 				if (contains(mouseX, mouseY, contX, contY, contWidth, contHeight))
 					if (!pointExists (mouseX, mouseY))
-<<<<<<< HEAD
 					{
 							p1 = new Point(mouseX, mouseY);
 							pointList.add(p1);
@@ -234,19 +187,6 @@ public class GUI extends PApplet {
 							}
 
 					}
-=======
-						pointCount++;
-						if (pointCount == 1) {
-							p1 = new Point(mouseX, mouseY);
-							pointList.add(p1);
-						} else if (pointCount == 2) {
-							p2 = new Point(mouseX, mouseY);
-							pointList.add(p2);
-							Rectangle r = new Rectangle (p1, p2, -1, null);
-							rectList.add(r);
-							pointCount = 0;
-						}
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 				break;
 			case delete:
 				if (pointExists (mouseX, mouseY)) {
@@ -277,7 +217,6 @@ public class GUI extends PApplet {
 				}
 				searchDone = false;
 				break;
-<<<<<<< HEAD
 			case enter:
 				enterDone = true;
 				ArrayList<Rectangle> tempArray = new ArrayList<Rectangle>();
@@ -287,8 +226,6 @@ public class GUI extends PApplet {
 				drawRectangleList = myTree.makeRTree(tempArray,0);
 				drawRectangleList();
 				break;
-=======
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 		}
 	}
 	
@@ -299,7 +236,6 @@ public class GUI extends PApplet {
 		int y = r.p1.y;
 		int w = r.p2.x - r.p1.x;
 		int h = r.p2.y - r.p1.y;
-<<<<<<< HEAD
 		stroke(myColor[r.getDepth()].getRGB());
 		rect(x, y, w, h);
 		
@@ -313,11 +249,6 @@ public class GUI extends PApplet {
 	}
 	
 	
-=======
-		rect(x, y, w, h);
-	}
-	
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 	// Determines if a point exists at given coordinates
 	public boolean pointExists(int x, int y) {
 		for (int i = 0; i < pointList.size(); i++) {
@@ -335,11 +266,8 @@ public class GUI extends PApplet {
 			deleteColor = pressedColor;
 		if (mode == mode.search)
 			searchColor = pressedColor;
-<<<<<<< HEAD
 		if (mode == mode.enter)
 			searchColor = pressedColor;
-=======
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 	}
 	
 	public ArrayList<Rectangle> getRectList() {
@@ -352,7 +280,6 @@ public class GUI extends PApplet {
 	
 	public boolean insertClicked(int mouseX, int mouseY) {
 		if (contains(mouseX, mouseY, panelX, insertY, buttonWidth, buttonHeight)) {
-<<<<<<< HEAD
 			return true;
 		} else {
 			return false;
@@ -361,28 +288,20 @@ public class GUI extends PApplet {
 	
 	public boolean searchClicked(int mouseX, int mouseY) {
 		if (contains(mouseX, mouseY, panelX, searchY, buttonWidth, buttonHeight)) {
-=======
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 			return true;
 		} else {
 			return false;
 		}
 	}
 	
-<<<<<<< HEAD
 	public boolean deleteClicked(int mouseX, int mouseY) {
 		if (contains(mouseX, mouseY, panelX, deleteY, buttonWidth, buttonHeight)) {
-=======
-	public boolean searchClicked(int mouseX, int mouseY) {
-		if (contains(mouseX, mouseY, panelX, searchY, buttonWidth, buttonHeight)) {
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 			return true;
 		} else {
 			return false;
 		}
 	}
 	
-<<<<<<< HEAD
 	public boolean enterClicked(int mouseX, int mouseY) {
 		if (contains(mouseX, mouseY, panelX, enterY, buttonWidth, buttonHeight)) {
 			return true;
@@ -393,35 +312,12 @@ public class GUI extends PApplet {
 	// If first two values are within rectangle bounds of last 4 values
 	public boolean contains(int x, int y, int rectX, int rectY, int rectWidth, int rectHeight) {
 		if (x > rectX && x < rectX+rectWidth && y > rectY && y < rectY+rectHeight) {
-=======
-	public boolean deleteClicked(int mouseX, int mouseY) {
-		if (contains(mouseX, mouseY, panelX, deleteY, buttonWidth, buttonHeight)) {
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 			return true;
 		} else {
 			return false;
 		}
 	}
 	
-<<<<<<< HEAD
-	// If point given is part of the rectangle given
-	public boolean pointOfRect(Point point, Rectangle rect) {
-		if (point.x == rect.p1.x && point.y == rect.p1.y || point.x == rect.p2.x && point.y == rect.p2.y) {
-			p1 = rect.p1;
-			p2 = rect.p2;
-=======
-	// If first two values are within rectangle bounds of last 4 values
-	public boolean contains(int x, int y, int rectX, int rectY, int rectWidth, int rectHeight) {
-		if (x > rectX && x < rectX+rectWidth && y > rectY && y < rectY+rectHeight) {
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
-<<<<<<< HEAD
-=======
 	// If point given is part of the rectangle given
 	public boolean pointOfRect(Point point, Rectangle rect) {
 		if (point.x == rect.p1.x && point.y == rect.p1.y || point.x == rect.p2.x && point.y == rect.p2.y) {
@@ -433,5 +329,4 @@ public class GUI extends PApplet {
 		}
 	}
 	
->>>>>>> 8dfb0e87e9eef73f1756bac134d2ce440550bd0d
 }
