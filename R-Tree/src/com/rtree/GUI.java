@@ -7,6 +7,11 @@ import processing.core.PApplet;
 
 public class GUI extends PApplet {
 
+	
+	public static ArrayList<Rectangle> drawRectangleList = new ArrayList<Rectangle>();
+	Color [] myColor = { new Color(255, 0, 0), new Color(0, 255, 0), new Color(0, 0, 255), new Color(100,100,100), new Color(0, 250, 154), new Color(255,255,0)};
+	RTree myTree = new RTree(3);
+	
 	public static ArrayList<Rectangle> rectList;
 	String insert = "Insert";
 	String search = "Search";
@@ -17,15 +22,18 @@ public class GUI extends PApplet {
 	boolean deleteClicked = false;
 	boolean enterClicked = false;
 	boolean searchDone = false;
+	boolean enterDone = false;
 	Color regColor = new Color(20, 20, 20, 255);
 	Color pressedColor = new Color(250, 50, 50, 255);
 	Color insertColor = new Color(1);
 	Color searchColor = new Color(1);
 	Color deleteColor = new Color(1);
+	Color enterColor = new Color(1);
 	int panelX = 580;
 	int insertY = 100;
 	int searchY = 200;
 	int deleteY = 300; 
+	int enterY = 400;
 	int buttonWidth = 150;
 	int buttonHeight = 50;
 	int contX = 20;
@@ -48,7 +56,7 @@ public class GUI extends PApplet {
 	int searchRectHeight;
 	
 	//keeps track of current mode
-	public static enum Mode {start, insert, delete, search};
+	public static enum Mode {start, insert, delete, search, enter};
 	Mode mode;
 	
 	public void setup() {
@@ -78,12 +86,15 @@ public class GUI extends PApplet {
 		rect(panelX, searchY, buttonWidth, buttonHeight);
 		fill(deleteColor.getRGB(), 255);
 		rect(panelX, deleteY, buttonWidth, buttonHeight);
-	
+		fill(enterColor.getRGB(), 255);
+		rect(panelX, enterY, buttonWidth, buttonHeight);
+		
 		// Button Text
 		fill(240, 245, 245, 255);
 		text(insert, panelX+45, insertY+30);
 		text(search, panelX+45, searchY+30);
 		text(delete, panelX+45, deleteY+30);
+		text(enter, panelX+45, enterY+30);
 		
 		// If not searching, draw all points
 		if (mode != mode.search) {
@@ -91,6 +102,9 @@ public class GUI extends PApplet {
 			for (Point p: pointList) {
 				fill(0, 0, 15, 100);
 				ellipse(p.x, p.y, 5, 5);
+			}
+			for (Rectangle r: drawRectangleList){
+				drawRect(r);
 			}
 			noFill();
 			for (Rectangle r: rectList)
@@ -125,6 +139,9 @@ public class GUI extends PApplet {
 		if (deleteClicked(mouseX, mouseY)) {
 			mode = mode.delete;
 		} 
+		if (enterClicked(mouseX, mouseY)) {
+			mode = mode.enter;
+		} 
 		
 		// What to do based on mode
 		modeBehavior(); 
@@ -134,6 +151,7 @@ public class GUI extends PApplet {
 		insertColor = regColor;
 		searchColor = regColor;
 		deleteColor = regColor;
+		enterColor = regColor;
 		
 		if (mode == mode.search) {
 			searchDone = true;
@@ -147,7 +165,7 @@ public class GUI extends PApplet {
 				Point p2 = new Point(mouseX, mouseY);
 				searchRectWidth = p2.x - p1.x;
 				searchRectHeight = p2.y - p1.y;
-				searchSpace = new Rectangle(p1, p2, 0, null);
+				searchSpace = new Rectangle(p1, p2, 0, null,null);
 			}
 		}
 	}
@@ -158,17 +176,17 @@ public class GUI extends PApplet {
 			case insert:
 				if (contains(mouseX, mouseY, contX, contY, contWidth, contHeight))
 					if (!pointExists (mouseX, mouseY))
-						pointCount++;
-						if (pointCount == 1) {
+					{
 							p1 = new Point(mouseX, mouseY);
 							pointList.add(p1);
-						} else if (pointCount == 2) {
-							p2 = new Point(mouseX, mouseY);
-							pointList.add(p2);
-							Rectangle r = new Rectangle (p1, p2, -1, null);
-							rectList.add(r);
-							pointCount = 0;
-						}
+							if(enterDone)
+							{
+								myTree.insert(new Rectangle(p1,p1,0,null,null));
+								drawRectangleList = myTree.getRTree();
+								drawRectangleList();
+							}
+
+					}
 				break;
 			case delete:
 				if (pointExists (mouseX, mouseY)) {
@@ -199,6 +217,15 @@ public class GUI extends PApplet {
 				}
 				searchDone = false;
 				break;
+			case enter:
+				enterDone = true;
+				ArrayList<Rectangle> tempArray = new ArrayList<Rectangle>();
+				for(Point p: pointList){
+					tempArray.add(new Rectangle(p,p,0,null,null));
+				}
+				drawRectangleList = myTree.makeRTree(tempArray,0);
+				drawRectangleList();
+				break;
 		}
 	}
 	
@@ -209,8 +236,18 @@ public class GUI extends PApplet {
 		int y = r.p1.y;
 		int w = r.p2.x - r.p1.x;
 		int h = r.p2.y - r.p1.y;
+		stroke(myColor[r.getDepth()].getRGB());
 		rect(x, y, w, h);
+		
 	}
+	
+	public void drawRectangleList(){
+		for(Rectangle r:drawRectangleList)
+		{
+			drawRect(r);
+		}
+	}
+	
 	
 	// Determines if a point exists at given coordinates
 	public boolean pointExists(int x, int y) {
@@ -228,6 +265,8 @@ public class GUI extends PApplet {
 		if (mode == mode.delete)
 			deleteColor = pressedColor;
 		if (mode == mode.search)
+			searchColor = pressedColor;
+		if (mode == mode.enter)
 			searchColor = pressedColor;
 	}
 	
@@ -263,6 +302,13 @@ public class GUI extends PApplet {
 		}
 	}
 	
+	public boolean enterClicked(int mouseX, int mouseY) {
+		if (contains(mouseX, mouseY, panelX, enterY, buttonWidth, buttonHeight)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	// If first two values are within rectangle bounds of last 4 values
 	public boolean contains(int x, int y, int rectX, int rectY, int rectWidth, int rectHeight) {
 		if (x > rectX && x < rectX+rectWidth && y > rectY && y < rectY+rectHeight) {
