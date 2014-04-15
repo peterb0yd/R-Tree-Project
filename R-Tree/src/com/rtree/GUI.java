@@ -17,24 +17,37 @@ public class GUI extends PApplet {
 	String search = "Search";
 	String delete = "Delete";
 	String enter = "Enter";
+	String minX = "Min X";
+	String minY = "Min Y";
 	boolean insertClicked = false;
 	boolean searchClicked = false;
 	boolean deleteClicked = false;
 	boolean enterClicked = false;
+	boolean minXClicked = false;
+	boolean minYClicked = false;
 	boolean searchDone = false;
 	boolean enterDone = false;
-	Color regColor = new Color(20, 20, 20, 255);
+	Color regTextColor = new Color(250, 250, 250, 255);
+	Color regButtonColor = new Color(20, 20, 20, 255);
 	Color pressedColor = new Color(250, 50, 50, 255);
+	Color eraseColor = new Color(255, 255, 255, 255);
 	Color insertColor = new Color(1);
 	Color searchColor = new Color(1);
 	Color deleteColor = new Color(1);
 	Color enterColor = new Color(1);
-	int panelX = 580;
+	Color minXColor = new Color(1);
+	Color minYColor = new Color(1);
+	int panelX = 560;
 	int insertY = 100;
-	int searchY = 200;
-	int deleteY = 300; 
-	int enterY = 400;
-	int buttonWidth = 150;
+	int searchY = 160;
+	int deleteY = 260; 
+	int enterY = 300;
+	int panelMinY = 360;
+	int minX_X = panelX;
+	int minY_X = 680;
+	int minButtonWidth = 80;
+	int minButtonHeight = 80;
+	int buttonWidth = 200;
 	int buttonHeight = 50;
 	int contX = 20;
 	int contY = 20; 
@@ -46,17 +59,17 @@ public class GUI extends PApplet {
 	Point p1; 
 	Point p2;
 	
-	//holds existing points (they are held in rectangle objects)
+	// Holds existing points (they are held in rectangle objects)
 	private static ArrayList<Point> pointList = new ArrayList<Point> ();
 	
-	Rectangle searchSpace;	//holds current search rectangle
+	Rectangle searchSpace;	// Holds current search rectangle
 	int searchRectX;
 	int searchRectY;
 	int searchRectWidth;
 	int searchRectHeight;
 	
-	//keeps track of current mode
-	public static enum Mode {start, insert, delete, search, enter};
+	// Keeps track of current mode
+	public static enum Mode {start, insert, delete, search, enter, minX, minY};
 	Mode mode;
 	
 	public void setup() {
@@ -70,6 +83,7 @@ public class GUI extends PApplet {
 
 	public void draw() {
 		// Container
+		background(255, 255, 255, 255);
 		fill(250, 250, 250, 250);
 		rect(20, 20, 500, 450);
 		stroke(60, 30, 30, 255);
@@ -79,43 +93,60 @@ public class GUI extends PApplet {
 		textFont(createFont("Georgia", 20));
 		textSize(20);
 		
-		// Button Shapes
-		fill(insertColor.getRGB(), 255);
-		rect(panelX, insertY, buttonWidth, buttonHeight);
-		fill(searchColor.getRGB(), 255);
-		rect(panelX, searchY, buttonWidth, buttonHeight);
-		fill(deleteColor.getRGB(), 255);
-		rect(panelX, deleteY, buttonWidth, buttonHeight);
-		fill(enterColor.getRGB(), 255);
-		rect(panelX, enterY, buttonWidth, buttonHeight);
-		
-		// Button Text
-		fill(240, 245, 245, 255);
-		text(insert, panelX+45, insertY+30);
-		text(search, panelX+45, searchY+30);
-		text(delete, panelX+45, deleteY+30);
-		text(enter, panelX+45, enterY+30);
+		if (!enterDone) {
+			// Button Shapes
+			buttonHeight = 80;
+			insertY = 150;
+			enterY = 280;
+			fill(insertColor.getRGB(), 255);
+			rect(panelX, insertY, buttonWidth, buttonHeight);
+			fill(enterColor.getRGB(), 255);
+			rect(panelX, enterY, buttonWidth, buttonHeight);
+			// Button Text
+			fill(240, 245, 245, 255);
+			text(insert, panelX+70, insertY+47);
+			text(enter, panelX+73, enterY+47);
+		} else {
+			// Button Shapes
+			buttonHeight = 50;
+			insertY = 60;
+			fill(insertColor.getRGB(), 255);
+			rect(panelX, insertY, buttonWidth, buttonHeight);
+			fill(searchColor.getRGB(), 255);
+			rect(panelX, searchY, buttonWidth, buttonHeight);
+			fill(deleteColor.getRGB(), 255);
+			rect(panelX, deleteY, buttonWidth, buttonHeight);
+			fill(minXColor.getRGB(), 255);
+			rect(minX_X, panelMinY, minButtonWidth, minButtonHeight);
+			fill(minYColor.getRGB(), 255);
+			rect(minY_X, panelMinY, minButtonWidth, minButtonHeight);
+			// Button Text
+			fill(240, 245, 245, 255);
+			text(insert, panelX+70, insertY+30);
+			text(search, panelX+70, searchY+30);
+			text(delete, panelX+70, deleteY+30);
+			text(minX, minX_X+12, panelMinY+45);
+			text(minY, minY_X+12, panelMinY+45);
+		}
 		
 		// If not searching, draw all points
 		if (mode != mode.search) {
-			// Rectangle testing
+			// Draw Points
 			for (Point p: pointList) {
 				fill(0, 0, 15, 100);
 				ellipse(p.x, p.y, 5, 5);
 			}
+			// Draw Rectangles
 			for (Rectangle r: drawRectangleList){
 				drawRect(r);
 			}
-			noFill();
-			for (Rectangle r: rectList)
-				drawRect(r);
 		}
 		
 		// If searching, draw rectangles within selected region
 		if (mode == mode.search && searchSpace != null) {
 			if (contains(searchSpace.p1.x, searchSpace.p1.y, contX, contY, contWidth, contHeight)) {
 				drawRect(searchSpace);
-				for (Rectangle r: rectList) {
+				for (Rectangle r: drawRectangleList) {
 					if (contains(r.p1.x, r.p1.y, searchRectX, searchRectY, searchRectWidth, searchRectHeight) && 
 							contains(r.p2.x, r.p2.y, searchRectX, searchRectY, searchRectWidth, searchRectHeight)) {
 						noFill();
@@ -132,26 +163,34 @@ public class GUI extends PApplet {
 	public void mousePressed() {
 		if (insertClicked(mouseX, mouseY)) {
 			mode = mode.insert;
-		} 
-		if (searchClicked(mouseX, mouseY)) { 
-			mode = mode.search;
-		} 
-		if (deleteClicked(mouseX, mouseY)) {
-			mode = mode.delete;
-		} 
-		if (enterClicked(mouseX, mouseY)) {
+		}
+		if (!enterDone && enterClicked(mouseX, mouseY)) {
 			mode = mode.enter;
 		} 
-		
+		if (enterDone && searchClicked(mouseX, mouseY)) { 
+			mode = mode.search;
+		} 
+		if (enterDone && deleteClicked(mouseX, mouseY)) {
+			mode = mode.delete;
+		} 
+		if (enterDone && minXClicked(mouseX, mouseY)) {
+			mode = mode.minX;
+		} 
+		if (enterDone && minYClicked(mouseX, mouseY)) {
+			mode = mode.minY;
+		} 
+
 		// What to do based on mode
 		modeBehavior(); 
 	}	
 	
 	public void mouseReleased() {
-		insertColor = regColor;
-		searchColor = regColor;
-		deleteColor = regColor;
-		enterColor = regColor;
+		insertColor = regButtonColor;
+		searchColor = regButtonColor;
+		deleteColor = regButtonColor;
+		enterColor = regButtonColor;
+		minXColor = regButtonColor;
+		minYColor = regButtonColor;
 		
 		if (mode == mode.search) {
 			searchDone = true;
@@ -175,17 +214,14 @@ public class GUI extends PApplet {
 		switch (mode)	{
 			case insert:
 				if (contains(mouseX, mouseY, contX, contY, contWidth, contHeight))
-					if (!pointExists (mouseX, mouseY))
-					{
+					if (!pointExists (mouseX, mouseY)) {
 							p1 = new Point(mouseX, mouseY);
 							pointList.add(p1);
-							if(enterDone)
-							{
+							if(enterDone) {
 								myTree.insert(new Rectangle(p1,p1,0,null,null));
 								drawRectangleList = myTree.getRTree();
 								drawRectangleList();
 							}
-
 					}
 				break;
 			case delete:
@@ -193,11 +229,11 @@ public class GUI extends PApplet {
 					for (int i = 0; i < pointList.size(); i++) {
 						Point point = pointList.get(i);
 						if (Math.pow(mouseX - pointList.get(i).x,2) + Math.pow(mouseY - pointList.get(i).y,2) <= 25) {
-							for (int j = 0; j < rectList.size(); j++) {
-								Rectangle rect = rectList.get(j);
+							for (int j = 0; j < drawRectangleList.size(); j++) {
+								Rectangle rect = drawRectangleList.get(j);
 								if (pointOfRect(point, rect)) { 
 									System.out.println(rect.p1.x + "  " + rect.p1.y);
-									rectList.remove(j);
+									drawRectangleList.remove(j);		// subject to change
 									pointList.remove(p1);
 									pointList.remove(p2);
 								}	
@@ -226,6 +262,10 @@ public class GUI extends PApplet {
 				drawRectangleList = myTree.makeRTree(tempArray,0);
 				drawRectangleList();
 				break;
+				
+			// MIN X CASE
+				
+			// MIN Y CASE
 		}
 	}
 	
@@ -241,13 +281,12 @@ public class GUI extends PApplet {
 		
 	}
 	
+	// Draw structured Rectangle List from Algorithm
 	public void drawRectangleList(){
-		for(Rectangle r:drawRectangleList)
-		{
+		for(Rectangle r:drawRectangleList) {
 			drawRect(r);
 		}
 	}
-	
 	
 	// Determines if a point exists at given coordinates
 	public boolean pointExists(int x, int y) {
@@ -262,12 +301,17 @@ public class GUI extends PApplet {
 	public void setPressedColors() {
 		if (mode == mode.insert)
 			insertColor = pressedColor;
-		if (mode == mode.delete)
+		if (!enterDone && mode == mode.enter)
+			searchColor = pressedColor;
+		if (enterDone && mode == mode.delete)
 			deleteColor = pressedColor;
-		if (mode == mode.search)
+		if (enterDone && mode == mode.search)
 			searchColor = pressedColor;
-		if (mode == mode.enter)
-			searchColor = pressedColor;
+		if (enterDone && mode == mode.minX)
+			minXColor = pressedColor;
+		if (enterDone && mode == mode.minY)
+			minYColor = pressedColor;
+	
 	}
 	
 	public ArrayList<Rectangle> getRectList() {
@@ -277,7 +321,6 @@ public class GUI extends PApplet {
 	public void setRectList() {
 		this.rectList = rectList;
 	}
-	
 	public boolean insertClicked(int mouseX, int mouseY) {
 		if (contains(mouseX, mouseY, panelX, insertY, buttonWidth, buttonHeight)) {
 			return true;
@@ -285,7 +328,6 @@ public class GUI extends PApplet {
 			return false;
 		}
 	}
-	
 	public boolean searchClicked(int mouseX, int mouseY) {
 		if (contains(mouseX, mouseY, panelX, searchY, buttonWidth, buttonHeight)) {
 			return true;
@@ -293,7 +335,6 @@ public class GUI extends PApplet {
 			return false;
 		}
 	}
-	
 	public boolean deleteClicked(int mouseX, int mouseY) {
 		if (contains(mouseX, mouseY, panelX, deleteY, buttonWidth, buttonHeight)) {
 			return true;
@@ -301,9 +342,22 @@ public class GUI extends PApplet {
 			return false;
 		}
 	}
-	
 	public boolean enterClicked(int mouseX, int mouseY) {
 		if (contains(mouseX, mouseY, panelX, enterY, buttonWidth, buttonHeight)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public boolean minXClicked(int mouseX, int mouseY) {
+		if (contains(mouseX, mouseY, minX_X, panelMinY, minButtonWidth, minButtonHeight)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public boolean minYClicked(int mouseX, int mouseY) {
+		if (contains(mouseX, mouseY, minY_X, panelMinY, minButtonWidth, minButtonHeight)) {
 			return true;
 		} else {
 			return false;
