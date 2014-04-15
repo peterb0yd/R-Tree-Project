@@ -265,22 +265,28 @@ public class RTree {
 //		System.out.println(returnList.contains(r));
 //		System.out.println(returnList.contains(r.getParent()));
 //		System.out.println(checkPath(r));
-		for(int x=0;x<5;x++)
-		{
-			System.out.println("");
-		}
+		
+		System.out.println();
+		
+		
 		Rectangle leaf = findLeaf(r);
-		leaf.removeChild(r);
-		returnList.remove(r);
-		//checkTree();
-
-		condenseTree(r.getParent());
-		if(root.getChildren().size()==1){
-			Rectangle newRoot = root.getChildren().get(0);
-			newRoot.setParent(null);
-			returnList.remove(root);
-			root = newRoot;
+		if (leaf == null) {
+			System.out.println("LEAF IS NULL!");
+		} else {
+			checkTree();
+			leaf.removeChild(r);
+			returnList.remove(r);
+	
+	
+			condenseTree(r.getParent());
+			if(root.getChildren().size()==1){
+				Rectangle newRoot = root.getChildren().get(0);
+				newRoot.setParent(null);
+				returnList.remove(root);
+				root = newRoot;
+			}
 		}
+		
 		//printTree();
 
 	}
@@ -591,6 +597,9 @@ public class RTree {
 	public void checkTree(){
 		for(Rectangle r: returnList)
 		{
+			if (r == null) {
+				break;
+			}
 			if(!r.isPoint())
 			{
 				for(Rectangle c: r.getChildren())
