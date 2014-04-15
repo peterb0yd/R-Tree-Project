@@ -421,7 +421,47 @@ public class RTree {
 
 
 	}
-	
+	/*
+	 * will return the lowest level of X in that Rectangle
+	 * and the last call will be a point 
+	 */
+	public Rectangle minimumX(Rectangle r){
+		//if it's only a point, return that point
+				if(r.isPoint()){
+					return r;
+				}else{
+					int minX = Integer.MAX_VALUE; 
+					Rectangle rec =null;
+					for(Rectangle p : r.getChildren())
+						if(p.getP1().getX() < minX){
+							//possibly might need to change from p to r
+							minX = p.getP1().getX();
+							rec = p; 
+						}
+					return minimumX(rec);
+				}
+			}
+	/*
+	 * will return the lowest level of Y in that Rectangle
+	 * and the last call will be a point 
+	 */
+	public Rectangle minimumY(Rectangle r){
+		//if it's only a point, return that point
+				if(r.isPoint()){
+					return r;
+				}else{
+					int minY = Integer.MAX_VALUE; 
+					Rectangle rec =null;
+					for(Rectangle p : r.getChildren())
+						if(p.getP2().getY() < minY){
+							//possibly might need to change from p to r
+							minY = p.getP2().getY();
+							rec = p; 
+						}
+					return minimumY(rec);
+				}
+			}
+
 	
 	public void printTree(){
 		for(Rectangle r: returnList){
