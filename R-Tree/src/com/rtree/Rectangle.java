@@ -2,13 +2,12 @@ package com.rtree;
 
 import java.util.ArrayList;
 
-
 public class Rectangle {
 	Point p1;
 	Point p2;
 	Point pCenter;
 	int depth=0;
-	ArrayList<Rectangle> children = null;
+	ArrayList<Rectangle> children = new ArrayList<Rectangle>();
 	Rectangle parent = null;
 	public Rectangle(Point a, Point b, int d, ArrayList<Rectangle> c, Rectangle p)
 	{
@@ -31,10 +30,10 @@ public class Rectangle {
 		children = c;
 		parent = p;
 		pCenter = new Point((int)((p1.getX()+p2.getX())/2),(int)((p1.getY()+p2.getY())/2));
-		
+
 	}
-	
-	
+
+
 	public Point getP1(){
 		return p1;
 	}
@@ -43,37 +42,37 @@ public class Rectangle {
 	}
 	public Point getPCenter(){
 		return pCenter;
-		
+
 	}
 	public int getDepth(){
 		return depth;
 	}
 	public void setDepth(int d){
 		depth = d;
-		
+
 	}
 	public ArrayList<Rectangle> getChildren(){
 		return children;
 	}
 	public Rectangle getParent(){
 		return parent;
-		
+
 	}
-	
+
 	public void setParent(Rectangle r){
 		parent = r;
-		
+
 	}
-	
+
 	public void removeChild(Rectangle r){
 		children.remove(r);
-		
+
 	}
-	
+
 	public void addChild(Rectangle r){
 		children.add(r);
 	}
-	
+
 	public void setSize(Point a, Point b){
 		p1 = a;
 		p2 = b;
@@ -82,25 +81,25 @@ public class Rectangle {
 	{
 		return p1.getX()*p2.getY();
 	}
-	
+
 	public boolean isPoint(){
 		if(p1.getX()==p2.getX()&p1.getY()==p2.getY()){
 			return true;
 		}
 		return false;
 	}
-	
+
 	public boolean isLeaf(){
 		if(children!=null&&!children.isEmpty()&&children.get(0).isPoint()){
 			return true;
 		}
 		return false;
 	}
-	
+
 	public int getArea(){
 		return Math.abs((p1.getX()-p2.getX())*(p1.getY()-p2.getY()));
 	}
-	
+
 	public void adjustMBR(){
 		int newMaxX = 0;
 		int newMinX =Integer.MAX_VALUE;
@@ -111,9 +110,23 @@ public class Rectangle {
 			newMinX =  Math.min(c.getP1().getX(),newMinX);
 			newMaxY = Math.max(c.getP1().getY(),newMaxY);
 			newMinY = Math.min(c.getP2().getY(),newMinY);
-			
+
 		}
 		p1 = new Point(newMinX,newMaxY);
 		p2 = new Point(newMaxX,newMinY);
 	}
+
+	public boolean hasParent(){
+		return parent!=null;
+	}
+	public boolean overlaps(Rectangle r){
+		if((p1.getX()<=r.getP2().getX())&&(r.getP1().getX()<=p2.getX())&(p2.getY()<=r.getP1().getY())&&(r.getP2().getY()<=p1.getY())){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+
 }
