@@ -1,5 +1,4 @@
-package com.rtree;
-
+package rtree;
 import java.awt.Color;
 import java.util.ArrayList;
 
@@ -27,7 +26,6 @@ public class GUI extends PApplet {
 	boolean minYClicked = false;
 	boolean searchDone = false;
 	boolean enterDone = false;
-	Color contColor = new Color(0, 0, 0, 255);
 	Color regTextColor = new Color(250, 250, 250, 255);
 	Color regButtonColor = new Color(20, 20, 20, 255);
 	Color pressedColor = new Color(250, 50, 50, 255);
@@ -38,6 +36,7 @@ public class GUI extends PApplet {
 	Color enterColor = new Color(1);
 	Color minXColor = new Color(1);
 	Color minYColor = new Color(1);
+	Color contColor = new Color(0, 0, 0, 255);
 	int panelX = 560;
 	int insertY = 100;
 	int searchY = 160;
@@ -84,8 +83,8 @@ public class GUI extends PApplet {
 
 	public void draw() {
 		// Container
-		background(255, 255, 255, 255);
-		fill(250, 250, 250, 250);
+		background(190, 190, 190, 255);
+		fill(240, 240, 240, 250);
 		stroke(contColor.getRGB(), 255);
 		strokeWeight(2);
 		rect(20, 20, 500, 450);
@@ -245,11 +244,15 @@ public class GUI extends PApplet {
 					if (Math.pow(mouseX - pointList.get(i).x,2) + Math.pow(mouseY - pointList.get(i).y,2) <= 25) {
 						for (int j = 0; j < drawRectangleList.size(); j++) {
 							Rectangle rect = drawRectangleList.get(j);
-							if (pointOfRect(point, rect)) { 
-								pointList.remove(p1);
-								pointList.remove(p2);
+							if (rect.isPoint()&&rect.getP1().getX()==point.x&&rect.getP2().getY()==point.y)  { 
+								//System.out.println(rect.p1.x + "  " + rect.p1.y);
+								//drawRectangleList.remove(j);		// subject to change
+								pointList.remove(point);
+								//pointList.remove(p1);
+								//pointList.remove(p2);
 								myTree.delete(rect);
 								drawRectangleList = myTree.getRTree();
+								//pointList.remove(p2);
 							}	
 						}
 					}
@@ -291,7 +294,7 @@ public class GUI extends PApplet {
 		int w = r.p2.x - r.p1.x;
 		int h = r.p2.y - r.p1.y;
 
-		stroke(myColor[r.getDepth()].getRGB());	
+			stroke(myColor[r.getDepth()].getRGB());	
 		
 		rect(x, y, w, h);
 

@@ -1,8 +1,12 @@
-package com.rtree;
+package rtree;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 
 public class RTree {
@@ -18,6 +22,9 @@ public class RTree {
 	private ArrayList<Rectangle> elimNodes= new ArrayList<Rectangle>();
 	private ArrayList<Rectangle> elimNodes2 = new ArrayList<Rectangle>();
 	private ArrayList<Rectangle> allChildren = new ArrayList<Rectangle>();
+
+
+	//private ArrayList<Rectangle> inList = new ArrayList<Rectangle>();
 
 	private Queue<Rectangle> q = new LinkedList<Rectangle>();
 
@@ -45,15 +52,18 @@ public class RTree {
 		returnList.add(rect3);
 		Rectangle rectParent = chooseLeaf(rect3,root);
 		rectParent.addChild(rect3); 
-
+		//System.out.println(rectParent.getChildren().size()+" rectparent size");
 		rect3.setParent(rectParent);
+
 		if(rectParent.getChildren().size()> capacity){
-
 			split(rectParent);
-
 		}
 		else
 			adjustTree(rect3);											//Tree is adjusted after split if split is called. If split is not called, it is adjusted here.
+
+		//System.out.println(checkParents());
+
+
 	}
 
 	//Chooses Rectangle in which to insert new element
@@ -84,8 +94,6 @@ public class RTree {
 			pickSeeds(tempStorage);
 		}
 		if(tempStorage.isEmpty()){
-			//System.out.println("before");
-			//System.out.println("root: "+root);
 			if(parent == null)
 			{
 				parent = new Rectangle(minimumBoundingRectangle(MBR1,MBR2), root.getDepth()+1,  new ArrayList<Rectangle>(), null);
@@ -93,14 +101,12 @@ public class RTree {
 				returnList.add(parent);
 				root = parent;
 
-				//System.out.println("root: "+root);
 			}
 
 			Rectangle r = new Rectangle(MBR1, parent.getDepth()-1, new ArrayList<Rectangle>(rectangle1), parent);
 			Rectangle b = new Rectangle(MBR2, parent.getDepth()-1,new ArrayList<Rectangle>(rectangle2), parent);
 
 			resetSplitGlobals();
-			//System.out.println("parent: "+parent+"root: "+ root);
 			parent.addChild(r);
 			parent.addChild(b);
 			for(Rectangle c: r.getChildren())
@@ -148,14 +154,11 @@ public class RTree {
 		}
 
 		rectangle1.add(rect1);
-		//System.out.println("X "+rect1.getP1().getX()+" Y: "+rect1.getP1().getY());
 		MBR1 = rect1;
 		rectangle2.add(rect2);
-		//System.out.println("X "+rect2.getP1().getX()+" Y: "+rect2.getP1().getY());
 		MBR2 = rect2;
 		tempStorage.remove(rect1);
 		tempStorage.remove(rect2);
-		//System.out.println("1 "+rectangle1+" "+rectangle2);
 	}
 
 	public void pickNext(){
@@ -217,7 +220,6 @@ public class RTree {
 			Rectangle p = r.getParent();
 
 			if(splitList.contains(r)&&p.getChildren().size()>capacity){
-				//System.out.println("splitting parent!");
 				split(r.getParent());
 			}
 			else
@@ -259,64 +261,75 @@ public class RTree {
 
 
 	public void delete(Rectangle r){
-//		System.out.println(r);
-//		System.out.println(r.getParent());
-//		System.out.println(r.getParent().getChildren().contains(r));
-//		System.out.println(returnList.contains(r));
-//		System.out.println(returnList.contains(r.getParent()));
-//		System.out.println(checkPath(r));
-		
-		System.out.println();
-		
-		
+		for(int x =0; x< 5;x++)
+			System.out.println();
+
+		//System.out.println(checkParents());
 		Rectangle leaf = findLeaf(r);
-		if (leaf == null) {
-			System.out.println("LEAF IS NULL!");
-		} else {
-			checkTree();
-			leaf.removeChild(r);
-			returnList.remove(r);
-	
-	
-			condenseTree(r.getParent());
-			if(root.getChildren().size()==1){
-				Rectangle newRoot = root.getChildren().get(0);
-				newRoot.setParent(null);
-				returnList.remove(root);
-				root = newRoot;
-			}
+		//System.out.println(checkPath(r)+", can be pathed to from root.");
+		//System.out.println("Before Delete: "+checkPath2AllChildren());
+
+		//checkTree();
+		leaf.removeChild(r);
+		returnList.remove(r);
+
+
+		condenseTree(leaf);
+		if(root.getChildren().size()==1){
+			Rectangle newRoot = root.getChildren().get(0);
+			newRoot.setParent(null);
+
+			returnList.remove(root);
+
+			root = newRoot;
 		}
-		
-		//printTree();
 
+		//System.out.println("After Delete: "+checkPath2AllChildren());
+		System.out.println(checkParents());
 	}
-	public Rectangle findLeaf(Rectangle p){
 
-		q.offer(root);
+	public Rectangle findLeaf(Rectangle p){
+		if(p.getArea()>1)
+			System.out.println("MAYDAYMADAY PROBLEM!!!!!");
+		q.clear();
+		q.add(root);
 		while(!q.isEmpty())
 		{
 			Rectangle next = q.poll();
 			if(next.isLeaf())
 			{
-				for(Rectangle c: next.getChildren())
+				if(next.getChildren().contains(p))
 				{
-					if(c.equals(p))
-					{
-						return next;
-					}
+					q.clear();
+					return next;
 				}
 			}
 			else
 			{
 				for(Rectangle c: next.getChildren())
 				{
-					if(c.overlaps(p))
+					if(c.contains(p))
 					{
-						q.offer(c);
+						System.out.println("Overlaps: "+next.getDepth()+" "+ next+ " "+c.getDepth()+" "+c+" ");
+						for(Rectangle d: c.getChildren())
+						{
+							d.printBounds();
+							System.out.println();
+						}
+						p.printBounds();
+						q.add(c);
 					}
 				}
 			}
 		}
+		//System.out.println("return list equals temp? "+(returnList.size()==temp.size()));
+		//System.out.println("Element of returnList? "+returnList.contains(p));
+		System.out.println("Does everything have a parent?: "+checkParents());
+		System.out.println("Couldn't find it :c");
+		System.out.println(p.getParent());
+		System.out.println(p.getParent().getChildren().contains(p));
+		System.out.println("Was reinserted: "+p.hasReinserted());
+		System.out.println(checkPathToMe(p.getParent()));
 		return null;
 	}
 
@@ -330,20 +343,30 @@ public class RTree {
 				{
 					allChildren(rect);
 				}
-				//System.out.println(allChildren.size());
-				for(Rectangle c:allChildren)
-				{
-					returnList.remove(c);
-					insert(c);
-				}
-				elimNodes.get(elimNodes.size()-1).getParent().removeChild(elimNodes.get(elimNodes.size()-1));
 				for(Rectangle e:elimNodes){	
+					for(Rectangle c : e.getChildren())
+					{
+						c.setParent(null);
+					}
 					returnList.remove(e);
 				}
 				for(Rectangle e:elimNodes2)
 				{
+					for(Rectangle c : e.getChildren())
+					{
+						c.setParent(null);
+					}
 					returnList.remove(e);
 				}
+
+				for(Rectangle c:allChildren)
+				{
+					returnList.remove(c);
+					c.setReinserted();
+					insert(c);
+				}
+				elimNodes.get(elimNodes.size()-1).getParent().removeChild(elimNodes.get(elimNodes.size()-1));
+
 				elimNodes.clear();
 				elimNodes2.clear();
 				allChildren.clear();
@@ -367,14 +390,14 @@ public class RTree {
 	}
 
 	public void allChildren(Rectangle r){
-		if(r.isPoint()){
+		if(r.isPoint()&&!allChildren.contains(r)){
 			allChildren.add(r);
 		}
 		else
 		{
 			for(Rectangle c: r.getChildren())
 			{
-				if(!elimNodes.contains(c)&&!c.isPoint())
+				if(!elimNodes.contains(c)&&!elimNodes2.contains(c)&&!c.isPoint())
 				{
 					elimNodes2.add(c);
 				}
@@ -505,13 +528,12 @@ public class RTree {
 	public ArrayList<Rectangle> search(Rectangle r){
 		ArrayList<Rectangle> searchList = new ArrayList<Rectangle>();
 		q.clear();
-		q.offer(root);
+		q.add(root);
 		while(!q.isEmpty())
 		{
 			Rectangle next = q.poll();
 			if(next.isPoint())
 			{
-				//System.out.println("doin thangz");
 				searchList.add(next);
 			}
 			else
@@ -520,7 +542,7 @@ public class RTree {
 				{
 					if(r.overlaps(c))
 					{		
-						q.offer(c);
+						q.add(c);
 					}
 				}
 			}
@@ -539,7 +561,7 @@ public class RTree {
 	public Rectangle getMinimumY(){
 		return minimumY(root);
 	}
-	
+
 	public Rectangle minimumX(Rectangle r){
 		//if it's only a point, return that point
 		if(r.isPoint()){
@@ -597,9 +619,6 @@ public class RTree {
 	public void checkTree(){
 		for(Rectangle r: returnList)
 		{
-			if (r == null) {
-				break;
-			}
 			if(!r.isPoint())
 			{
 				for(Rectangle c: r.getChildren())
@@ -630,7 +649,47 @@ public class RTree {
 		}
 		return checkPath(r.getParent());
 	}
-	
+
+
+	public boolean checkPath2(Rectangle r)
+	{
+		q.clear();
+		q.add(root);
+		while(!q.isEmpty())
+		{
+			Rectangle next = q.poll();
+
+			if(next.equals(r))
+			{
+				q.clear();
+				return true;
+			}
+			if(!next.isPoint())
+			{
+				for(Rectangle c:next.getChildren())
+				{
+					q.add(c);
+
+				}
+			}
+		}
+		return false;
+	}
+	public boolean checkPath2AllChildren(){
+		for(Rectangle r: returnList)
+		{
+			if(!checkPath2(r))
+			{
+				System.out.println(r.getDepth());
+				System.out.println(r.getP1().getX()+" "+r.getP1().getY());
+				return false;
+			}
+		}
+		return true;
+
+	}
+
+
 	public void checkOverlap()
 	{
 		for(Rectangle r: returnList)
@@ -645,6 +704,43 @@ public class RTree {
 		}
 	}
 
+	public boolean checkParents(){
+		for(Rectangle r: returnList)
+		{
+			if(r!=root&&r.getParent()==null)
+			{
+				System.out.println("Depth: "+r.getDepth());
+				System.out.println("Is a point: "+r.isPoint()+"x: "+ r.getP1().getX()+" y: "+r.getP1().getY());
+				return false;
+			}
+		}
+		return true;
 
+
+	}
+	public boolean checkPathToMe(Rectangle r)
+	{
+		q.clear();
+		q.add(root);
+		while(!q.isEmpty())
+		{
+			Rectangle next = q.poll();
+
+			if(next.equals(r))
+			{
+				q.clear();
+				return true;
+			}
+			if(!next.isLeaf())
+			{
+				for(Rectangle c:next.getChildren())
+				{
+					q.add(c);
+
+				}
+			}
+		}
+		return false;
+	}
 
 }

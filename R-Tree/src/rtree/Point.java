@@ -1,4 +1,4 @@
-package com.rtree;
+package rtree;
 
 public class Point {
 	int x=0;

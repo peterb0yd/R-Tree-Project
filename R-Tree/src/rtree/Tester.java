@@ -1,4 +1,4 @@
-package com.rtree;
+package rtree;
 
 import java.util.ArrayList;
 
