@@ -35,6 +35,7 @@ public class GUI extends PApplet {
 	Color enterColor = new Color(1);
 	Color minXColor = new Color(1);
 	Color minYColor = new Color(1);
+	Color contColor = new Color(0, 0, 0, 255);
 	int panelX = 560;
 	int insertY = 100;
 	int searchY = 160;
@@ -84,7 +85,7 @@ public class GUI extends PApplet {
 		background(255, 255, 255, 255);
 		fill(250, 250, 250, 250);
 		rect(20, 20, 500, 450);
-		stroke(60, 30, 30, 255);
+		stroke(contColor.getRGB(), 255);
 		strokeWeight(2);
 
 		// Text
@@ -242,12 +243,12 @@ public class GUI extends PApplet {
 					if (Math.pow(mouseX - pointList.get(i).x,2) + Math.pow(mouseY - pointList.get(i).y,2) <= 25) {
 						for (int j = 0; j < drawRectangleList.size(); j++) {
 							Rectangle rect = drawRectangleList.get(j);
-							if (pointOfRect(point, rect)) { 
+							if (rect.isPoint()&&rect.getP1().getX()==point.x&&rect.getP2().getY()==point.y)  { 
 								//System.out.println(rect.p1.x + "  " + rect.p1.y);
 								//drawRectangleList.remove(j);		// subject to change
-								//pointList.remove(point);
-								pointList.remove(p1);
-								pointList.remove(p2);
+								pointList.remove(point);
+								//pointList.remove(p1);
+								//pointList.remove(p2);
 								myTree.delete(rect);
 								drawRectangleList = myTree.getRTree();
 								//pointList.remove(p2);

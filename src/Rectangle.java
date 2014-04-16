@@ -8,6 +8,7 @@ public class Rectangle {
 	int depth=0;
 	ArrayList<Rectangle> children = new ArrayList<Rectangle>();
 	Rectangle parent = null;
+	boolean reinserted = false;
 	public Rectangle(Point a, Point b, int d, ArrayList<Rectangle> c, Rectangle p)
 	{
 		p1 = a;
@@ -71,6 +72,8 @@ public class Rectangle {
 	public void addChild(Rectangle r){
 		children.add(r);
 	}
+	
+	
 
 	public void setSize(Point a, Point b){
 		p1 = a;
@@ -82,14 +85,14 @@ public class Rectangle {
 	}
 
 	public boolean isPoint(){
-		if(p1.getX()==p2.getX()&p1.getY()==p2.getY()){
+		if(p1.getX()==p2.getX()&&p1.getY()==p2.getY()&&(children==null||children.isEmpty())){
 			return true;
 		}
 		return false;
 	}
 
 	public boolean isLeaf(){
-		if(children!=null&&!children.isEmpty()&&children.get(0).isPoint()){
+		if(children!=null&&!children.isEmpty()&&children.get(0).isPoint()&&(children.get(0).getChildren()==null||children.get(0).getChildren().isEmpty())){
 			return true;
 		}
 		return false;
@@ -118,14 +121,29 @@ public class Rectangle {
 	public boolean hasParent(){
 		return parent!=null;
 	}
+	public boolean contains(Rectangle r){			//used only for Point rectangle r
+		return p1.getX()<=r.getP1().getX()&&p2.getX()>=r.getP1().getX()&&p1.getY()>=r.getP1().getY()&&p2.getY()<=r.getP1().getY();
+		
+		
+	}
+	
 	public boolean overlaps(Rectangle r){
-		if((p1.getX()<=r.getP2().getX())&&(r.getP1().getX()<=p2.getX())&(p2.getY()<=r.getP1().getY())&&(r.getP2().getY()<=p1.getY())){
+		if((p1.getX()<=r.getP2().getX()+5)&&(r.getP1().getX()<=p2.getX()+5)&&(p2.getY()<=r.getP1().getY()+5)&&(r.getP2().getY()<=p1.getY()+5)){
 			return true;
 		}
 		else{
 			return false;
 		}
 	}
-	
+	public boolean hasReinserted(){
+		return reinserted;
+	}
+	public void setReinserted(){
+		reinserted = true;
+	}
+	public void printBounds(){
+		System.out.println("("+p1.getX()+", "+p1.getY()+") "+"("+p2.getX()+", "+p2.getY()+")");
+		
+	}
 
 }
