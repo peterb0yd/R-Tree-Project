@@ -1,7 +1,9 @@
 package rtree;
 import java.util.ArrayList;
-
-
+/**
+ * Creates rectangles based from the points from the Point class
+  * The leftmost and rightmost points in our table.
+ */
 public class Rectangle {
 	Point p1;
 	Point p2;

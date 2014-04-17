@@ -1,5 +1,7 @@
 package rtree;
-
+/**
+ * X and Y coordinate point location
+ */
 public class Point {
 	int x=0;
 	int y=0;

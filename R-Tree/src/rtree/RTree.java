@@ -1,20 +1,14 @@
 package rtree;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
-import java.util.Set;
-
 
 public class RTree {
 
-	ArrayList<Rectangle> returnList = new ArrayList<Rectangle>();
-	double capacity = 0.0;
-	Rectangle root;
-
+	private ArrayList<Rectangle> returnList = new ArrayList<Rectangle>();
+	private double capacity = 0.0;
+	private Rectangle root;
 	private ArrayList<Rectangle> rectangle1 = new ArrayList<Rectangle>();
 	private ArrayList<Rectangle> rectangle2= new ArrayList<Rectangle>();
 	private ArrayList<Rectangle> tempStorage= new ArrayList<Rectangle>();
@@ -22,16 +16,12 @@ public class RTree {
 	private ArrayList<Rectangle> elimNodes= new ArrayList<Rectangle>();
 	private ArrayList<Rectangle> elimNodes2 = new ArrayList<Rectangle>();
 	private ArrayList<Rectangle> allChildren = new ArrayList<Rectangle>();
-
-
-	//private ArrayList<Rectangle> inList = new ArrayList<Rectangle>();
-
 	private Queue<Rectangle> q = new LinkedList<Rectangle>();
 
 	private Rectangle MBR1 = null;
 	private Rectangle MBR2 = null;
 
-	double curr =0; 
+	
 	public RTree(int c){
 		capacity = c;
 	}
@@ -48,11 +38,11 @@ public class RTree {
 	 */
 
 
+	//Precondition: returnList has at least two Rectangle
 	public void insert(Rectangle rect3){
 		returnList.add(rect3);
 		Rectangle rectParent = chooseLeaf(rect3,root);
 		rectParent.addChild(rect3); 
-		//System.out.println(rectParent.getChildren().size()+" rectparent size");
 		rect3.setParent(rectParent);
 
 		if(rectParent.getChildren().size()> capacity){
@@ -61,22 +51,23 @@ public class RTree {
 		else
 			adjustTree(rect3);											//Tree is adjusted after split if split is called. If split is not called, it is adjusted here.
 
-		//System.out.println(checkParents());
-
 
 	}
+	//Postcondition: The element has been inserted into the RTree, the GUI, and all of the effected rectangles have been resized 
 
-	//Chooses Rectangle in which to insert new element
+	
+	//Precondition: insert has been called. 
+	//This method attempts to find the most suitable rectangle to insert the new point.
 	public Rectangle chooseLeaf(Rectangle prect, Rectangle r){
 		if(r.isLeaf()){
 			return r;
 		}
 
-		Rectangle minRect = null;
+		Rectangle minRect = null;	
 		int minArea = Integer.MAX_VALUE;
 		for(Rectangle p: r.getChildren())
 		{
-			Rectangle temp = minimumBoundingRectangle(prect,p);
+			Rectangle temp = minimumBoundingRectangle(prect,p);		//Finds rectangle whose area has to increase the least to include the newest point.
 			if(temp.getArea()-p.getArea()<minArea)
 			{
 				minRect = p;
@@ -86,15 +77,17 @@ public class RTree {
 
 		return chooseLeaf(prect, minRect);
 	}
+	//Postcondition: The most suitable rectangle to hold the inserted point has been chosen
 
+	//Precondition: insert has been called and a suitable rectangle has been chosen to insert into. This rectangle does not have the capacity to store this point, and must be split.
 	public void split(Rectangle rect){
 		Rectangle parent = rect.getParent();
-		if(rectangle1.isEmpty()&&rectangle2.isEmpty()){
+		if(rectangle1.isEmpty()&&rectangle2.isEmpty()){				//tempStorage holds all children from the original group that need to be sorted into two new groups
 			tempStorage = rect.getChildren();
-			pickSeeds(tempStorage);
+			pickSeeds(tempStorage);											
 		}
-		if(tempStorage.isEmpty()){
-			if(parent == null)
+		if(tempStorage.isEmpty()){													//When tempStorage is empty, we're done adding the children into two new lists
+			if(parent == null)															//If the root node is being split, there must be a new root node created that contains both of these.
 			{
 				parent = new Rectangle(minimumBoundingRectangle(MBR1,MBR2), root.getDepth()+1,  new ArrayList<Rectangle>(), null);
 				returnList.remove(root);
@@ -103,13 +96,13 @@ public class RTree {
 
 			}
 
-			Rectangle r = new Rectangle(MBR1, parent.getDepth()-1, new ArrayList<Rectangle>(rectangle1), parent);
+			Rectangle r = new Rectangle(MBR1, parent.getDepth()-1, new ArrayList<Rectangle>(rectangle1), parent);	//Create two new rectangles that are going to be the parents of the children that were just sorted into new lists
 			Rectangle b = new Rectangle(MBR2, parent.getDepth()-1,new ArrayList<Rectangle>(rectangle2), parent);
 
 			resetSplitGlobals();
 			parent.addChild(r);
 			parent.addChild(b);
-			for(Rectangle c: r.getChildren())
+			for(Rectangle c: r.getChildren())		//Parent-child bonding!
 			{
 				c.setParent(r);
 			}
@@ -118,11 +111,11 @@ public class RTree {
 				c.setParent(b);
 			}
 			parent.removeChild(rect);
-			returnList.remove(rect);
+			returnList.remove(rect);						//Add to the master list.
 			returnList.add(r);
 			returnList.add(b);
 
-			splitList.add(r);
+			splitList.add(r);									//Stores a rectangle if it is the new result of a recent split. Used to decide whether the question of splitting is asked to its parent.
 			adjustTree(r);
 
 			return;
@@ -131,18 +124,21 @@ public class RTree {
 		pickNext();
 		split(rect);
 	}
-
-
+	//Postcondition: There are two new parents that hold the children of the overloaded rectangle that had to split. 
+	
+	
+	//Precondition: split was called. 
+	//This method will put the two points that are the least efficient pairing and puts them in separate sets.
 	public void pickSeeds(ArrayList<Rectangle> rect){
 		int maxArea = 0;
 		Rectangle rect1=null;
 		Rectangle rect2=null;
 		int temp = 0;
-		for(Rectangle x:rect)
+		for(Rectangle x:rect)				
 		{
 			for(Rectangle y: rect)
 			{
-				temp = minimumBoundingRectangle(x,y).getArea()-x.getArea()-y.getArea();
+				temp = minimumBoundingRectangle(x,y).getArea()-x.getArea()-y.getArea();	//Finds the pairing with the most wasted area.
 
 				if(temp>maxArea){
 					maxArea = temp;
@@ -154,13 +150,16 @@ public class RTree {
 		}
 
 		rectangle1.add(rect1);
-		MBR1 = rect1;
+		MBR1 = rect1;							//Stores the current minimum bounding rectangle of the rect1 list we are building.
 		rectangle2.add(rect2);
 		MBR2 = rect2;
 		tempStorage.remove(rect1);
 		tempStorage.remove(rect2);
 	}
-
+	//Postcondition: rect1 and rect2 each contain one rectangle-point that was originally in tempStorage.
+	
+	
+	//split and pickSeeds() were both called.
 	public void pickNext(){
 		int maxDifference = 0;
 		Rectangle maxDiff=null; //Will store the rectangle with maximum difference in preference between the two groups
@@ -184,7 +183,7 @@ public class RTree {
 			}
 		}
 
-		if((rectangle1.size()==1||rectangle2.size()==1)&&rectangle1.size()!=rectangle2.size()){
+		if((rectangle1.size()==1||rectangle2.size()==1)&&rectangle1.size()!=rectangle2.size()){		//Ignores the most efficient choice if one list is too small.
 			if(rectangle1.size()>rectangle2.size()){
 				maxDiffGroup = 2;
 
@@ -205,11 +204,11 @@ public class RTree {
 			rectangle2.add(maxDiff);
 		}
 		tempStorage.remove(maxDiff);
-
-
-
 	}
+	//Postcondition: Everything that was in tempStorage is now in one of the two lists.
 
+	
+	//Precondition: An insert occured
 	public void adjustTree(Rectangle r){
 		if(r.equals(root)){
 
@@ -220,7 +219,7 @@ public class RTree {
 			Rectangle p = r.getParent();
 
 			if(splitList.contains(r)&&p.getChildren().size()>capacity){
-				split(r.getParent());
+				split(r.getParent());																//If there was a split in its child and it is now over capacity, needs to split.
 			}
 			else
 			{
@@ -231,15 +230,18 @@ public class RTree {
 		}
 	}
 
+	//Precondition: A split has just finished.
 	public void resetSplitGlobals(){
 		rectangle1.clear();
 		rectangle2.clear();
 		tempStorage.clear();		
 		MBR1 = null;
 		MBR2 = null;
-
 	}
+	//Postcondition: Global variables are prepared for the next split.
 
+	
+	//Precondition: a and b are rectangles
 	public Rectangle minimumBoundingRectangle(Rectangle a, Rectangle b){
 		int newMaxX = Math.max(a.getP2().getX(),b.getP2().getX());
 		int newMinX =  Math.min(a.getP1().getX(),b.getP1().getX());
@@ -247,7 +249,7 @@ public class RTree {
 		int newMinY = Math.min(a.getP2().getY(),b.getP2().getY());
 		return new Rectangle(new Point(newMinX,newMaxY),  new Point(newMaxX, newMinY));
 	}
-
+	//Postcondition: the minimum bounding rectangle of a and b is returned.
 
 
 
@@ -259,23 +261,15 @@ public class RTree {
 	 */
 
 
-
+	//Precondition: A rectangle-point has been clicked on for deletion.
 	public void delete(Rectangle r){
-		for(int x =0; x< 5;x++)
-			System.out.println();
+		Rectangle leaf = findLeaf(r);		//Finds the rectangle attempting to be deleted
 
-		//System.out.println(checkParents());
-		Rectangle leaf = findLeaf(r);
-		//System.out.println(checkPath(r)+", can be pathed to from root.");
-		//System.out.println("Before Delete: "+checkPath2AllChildren());
-
-		//checkTree();
-		leaf.removeChild(r);
+		leaf.removeChild(r);							
 		returnList.remove(r);
 
-
 		condenseTree(leaf);
-		if(root.getChildren().size()==1){
+		if(root.getChildren().size()==1){		//If after the deletion the root only has one child, this child becomes the new root.
 			Rectangle newRoot = root.getChildren().get(0);
 			newRoot.setParent(null);
 
@@ -283,14 +277,11 @@ public class RTree {
 
 			root = newRoot;
 		}
-
-		//System.out.println("After Delete: "+checkPath2AllChildren());
-		System.out.println(checkParents());
 	}
-
+	//Postcondition: The rectangle-point picked has been deleted. The tree has been condensed to proper size.
+	
+	//Precondition: delete has been called
 	public Rectangle findLeaf(Rectangle p){
-		if(p.getArea()>1)
-			System.out.println("MAYDAYMADAY PROBLEM!!!!!");
 		q.clear();
 		q.add(root);
 		while(!q.isEmpty())
@@ -298,7 +289,7 @@ public class RTree {
 			Rectangle next = q.poll();
 			if(next.isLeaf())
 			{
-				if(next.getChildren().contains(p))
+				if(next.getChildren().contains(p))	//The child has been found! return its parent
 				{
 					q.clear();
 					return next;
@@ -310,38 +301,25 @@ public class RTree {
 				{
 					if(c.contains(p))
 					{
-						System.out.println("Overlaps: "+next.getDepth()+" "+ next+ " "+c.getDepth()+" "+c+" ");
-						for(Rectangle d: c.getChildren())
-						{
-							d.printBounds();
-							System.out.println();
-						}
-						p.printBounds();
 						q.add(c);
 					}
 				}
 			}
 		}
-		//System.out.println("return list equals temp? "+(returnList.size()==temp.size()));
-		//System.out.println("Element of returnList? "+returnList.contains(p));
-		System.out.println("Does everything have a parent?: "+checkParents());
-		System.out.println("Couldn't find it :c");
-		System.out.println(p.getParent());
-		System.out.println(p.getParent().getChildren().contains(p));
-		System.out.println("Was reinserted: "+p.hasReinserted());
-		System.out.println(checkPathToMe(p.getParent()));
-		return null;
+		return null;								
 	}
-
+	//Postcondition: The parent of the rectangle-point being deleted has been returned.
+	
+	//Precondition: A deletion has occured.
 	public void condenseTree(Rectangle r){
 
-		if(r.equals(root))
+		if(r.equals(root))								
 		{
 			if(elimNodes.size()>0)
 			{
 				for(Rectangle rect:elimNodes)
 				{
-					allChildren(rect);
+					allChildren(rect);							//gets all the rectangle-point children of rectangles being deleted
 				}
 				for(Rectangle e:elimNodes){	
 					for(Rectangle c : e.getChildren())
@@ -359,13 +337,13 @@ public class RTree {
 					returnList.remove(e);
 				}
 
-				for(Rectangle c:allChildren)
+				for(Rectangle c:allChildren)		//Reinserts children who need to relocate because their parents only had one child.
 				{
 					returnList.remove(c);
 					c.setReinserted();
 					insert(c);
 				}
-				elimNodes.get(elimNodes.size()-1).getParent().removeChild(elimNodes.get(elimNodes.size()-1));
+				elimNodes.get(elimNodes.size()-1).getParent().removeChild(elimNodes.get(elimNodes.size()-1)); //The last element of elimNodes will be the highest level among them. This detatches this entire portion from the rest of the tree
 
 				elimNodes.clear();
 				elimNodes2.clear();
@@ -377,18 +355,19 @@ public class RTree {
 		else
 		{
 			Rectangle p = r.getParent();
-			if(r.getChildren().size()<2){
+			if(r.getChildren().size()<2){				//If the rectangle has only one child, add it to the elimNodes list so it can be removed later. 
 				p.removeChild(r);
 				elimNodes.add(r);
 			}
 			else
 			{
-				r.adjustMBR();
+				r.adjustMBR();	
 			}
-			condenseTree(p);
+			condenseTree(p);								
 		}
 	}
 
+	//Precondition: a deletion has occurred and some rectangle-points must be reinserted due to their parents not having enough children
 	public void allChildren(Rectangle r){
 		if(r.isPoint()&&!allChildren.contains(r)){
 			allChildren.add(r);
@@ -397,7 +376,7 @@ public class RTree {
 		{
 			for(Rectangle c: r.getChildren())
 			{
-				if(!elimNodes.contains(c)&&!elimNodes2.contains(c)&&!c.isPoint())
+				if(!elimNodes.contains(c)&&!elimNodes2.contains(c)&&!c.isPoint())	//Any rectangle-points of the highest level rectangle being removed must be reinserted.
 				{
 					elimNodes2.add(c);
 				}
@@ -405,30 +384,23 @@ public class RTree {
 			}
 		}
 	}
+	//Postcondition: elimNodes and elimNodes2 contain all rectangles that must be deleted. allChildren contains all rectangle-points that must be reinserted.
 
 
 
-
-
+	//Precondition: At least two points were inserted and enter was pressed.
 	public ArrayList<Rectangle> makeRTree(ArrayList<Rectangle> rec, int depth)	//#MERLEISSOSWAG
 	{
 		returnList.addAll(rec);
-		/*
-		 	Base Case: Add the root node to list and return list
-		 */
-		if(rec.size()==1){
-			//rec.get(0).setDepth(depth);
-			//returnList.add(rec.get(0));
+		
+		if(rec.size()==1){				//Base case: Add the root node to master list of rectangles and return list
 
 			root = rec.get(0);
 			return returnList;
 		}
-		/*
-			Sort by x
-		 */
 		for(int x =0; x< rec.size();x++){
 			for(int y=0;y<rec.size()-1;y++){
-				if(rec.get(y).getPCenter().getX()>rec.get(y+1).getPCenter().getX())
+				if(rec.get(y).getPCenter().getX()>rec.get(y+1).getPCenter().getX())	//Sort rectangles by x (center point)
 				{
 					Rectangle temp = rec.get(y);
 					rec.remove(y);
@@ -455,10 +427,7 @@ public class RTree {
 			partitionArray.get(c).add(rec.get(x));
 			y++;
 		}
-		/*
-		Sort by y
-		 */
-		for(ArrayList<Rectangle> arr:partitionArray){
+		for(ArrayList<Rectangle> arr:partitionArray){							//Sort rectangles by y (center point)
 			for(int x =0; x<arr.size();x++){
 				for(int z=0;z<arr.size()-1;z++){
 					if(arr.get(z).getPCenter().getY()>arr.get(z+1).getPCenter().getY())
@@ -522,9 +491,10 @@ public class RTree {
 
 
 	}
+	//Postcondition: An RTree containing all the rectangle-points added before enter was pressed has been formed.
 
 
-
+	//Precondition: Search was called, offering a search box
 	public ArrayList<Rectangle> search(Rectangle r){
 		ArrayList<Rectangle> searchList = new ArrayList<Rectangle>();
 		q.clear();
@@ -532,7 +502,7 @@ public class RTree {
 		while(!q.isEmpty())
 		{
 			Rectangle next = q.poll();
-			if(next.isPoint())
+			if(next.isPoint())										//This point is inside the search rectangle, add it to the list
 			{
 				searchList.add(next);
 			}
@@ -540,7 +510,7 @@ public class RTree {
 			{
 				for(Rectangle c: next.getChildren())
 				{
-					if(r.overlaps(c))
+					if(r.overlaps(c))									//If this rectangle overlaps the search area, you must check all of its children
 					{		
 						q.add(c);
 					}
@@ -549,12 +519,11 @@ public class RTree {
 		}
 		return searchList;
 	}
-
-
-	/*
-	 * will return the lowest level of X in that Rectangle
-	 * and the last call will be a point 
-	 */
+	//Postcondition: An arraylist of all rectangle-points in the search area have been returned
+	
+	
+	
+	
 	public Rectangle getMinimumX(){
 		return minimumX(root);
 	}
@@ -562,6 +531,7 @@ public class RTree {
 		return minimumY(root);
 	}
 
+	//Precondition: The button looking for minimum x has been pressed. An RTree already exists
 	public Rectangle minimumX(Rectangle r){
 		//if it's only a point, return that point
 		if(r.isPoint()){
@@ -578,10 +548,9 @@ public class RTree {
 			return minimumX(rec);
 		}
 	}
-	/*
-	 * will return the lowest level of Y in that Rectangle
-	 * and the last call will be a point 
-	 */
+	//Postcondition: The rectangle-point with the smallest x component is returned.
+
+	//Precondition: The button looking for minimum y has been pressed. An RTree already exists
 	public Rectangle minimumY(Rectangle r){
 		//if it's only a point, return that point
 		if(r.isPoint()){
@@ -598,149 +567,5 @@ public class RTree {
 			return minimumY(rec);
 		}
 	}
-
-
-	public void printTree(){
-		for(Rectangle r: returnList){
-			System.out.println("This: "+r);
-			System.out.println("Parent: "+r.getParent());
-			System.out.println("Children: "+r.getChildren());
-			System.out.println("Depth: "+r.getDepth());
-			System.out.println("");
-		}
-		for(int x = 0 ;x<20;x++)
-		{
-			System.out.println("");
-		}
-
-
-	}
-
-	public void checkTree(){
-		for(Rectangle r: returnList)
-		{
-			if(!r.isPoint())
-			{
-				for(Rectangle c: r.getChildren())
-				{
-					if(!c.getParent().equals(r))
-					{
-						System.out.println("Oh noes!");
-					}
-				}
-			}
-			if(!r.equals(root))
-			{
-				if(!r.getParent().getChildren().contains(r))
-				{
-					System.out.println("Oh noes!");
-				}
-			}
-		}
-
-
-	}
-	public boolean checkPath(Rectangle r){
-		if(r==null)
-			return false;
-		if(r.equals(root))
-		{
-			return true;
-		}
-		return checkPath(r.getParent());
-	}
-
-
-	public boolean checkPath2(Rectangle r)
-	{
-		q.clear();
-		q.add(root);
-		while(!q.isEmpty())
-		{
-			Rectangle next = q.poll();
-
-			if(next.equals(r))
-			{
-				q.clear();
-				return true;
-			}
-			if(!next.isPoint())
-			{
-				for(Rectangle c:next.getChildren())
-				{
-					q.add(c);
-
-				}
-			}
-		}
-		return false;
-	}
-	public boolean checkPath2AllChildren(){
-		for(Rectangle r: returnList)
-		{
-			if(!checkPath2(r))
-			{
-				System.out.println(r.getDepth());
-				System.out.println(r.getP1().getX()+" "+r.getP1().getY());
-				return false;
-			}
-		}
-		return true;
-
-	}
-
-
-	public void checkOverlap()
-	{
-		for(Rectangle r: returnList)
-		{
-			if(r.isLeaf())
-			{
-				for(Rectangle c: r.getChildren())
-				{
-					System.out.println(r.overlaps(c));
-				}
-			}
-		}
-	}
-
-	public boolean checkParents(){
-		for(Rectangle r: returnList)
-		{
-			if(r!=root&&r.getParent()==null)
-			{
-				System.out.println("Depth: "+r.getDepth());
-				System.out.println("Is a point: "+r.isPoint()+"x: "+ r.getP1().getX()+" y: "+r.getP1().getY());
-				return false;
-			}
-		}
-		return true;
-
-
-	}
-	public boolean checkPathToMe(Rectangle r)
-	{
-		q.clear();
-		q.add(root);
-		while(!q.isEmpty())
-		{
-			Rectangle next = q.poll();
-
-			if(next.equals(r))
-			{
-				q.clear();
-				return true;
-			}
-			if(!next.isLeaf())
-			{
-				for(Rectangle c:next.getChildren())
-				{
-					q.add(c);
-
-				}
-			}
-		}
-		return false;
-	}
-
+	//Postcondition: The rectangle-point with the smallest y component is returned.
 }

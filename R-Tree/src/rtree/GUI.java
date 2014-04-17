@@ -11,7 +11,6 @@ public class GUI extends PApplet {
 	Color [] myColor = { new Color(255, 0, 0), new Color(0, 255, 0), new Color(0, 0, 255), new Color(100,100,100), new Color(0, 250, 154), new Color(255,255,0), new Color(133, 95, 22), new Color(23, 95, 160)};
 	RTree myTree = new RTree(3);
 
-	public static ArrayList<Rectangle> rectList;
 	String insert = "Insert";
 	String search = "Search";
 	String delete = "Delete";
@@ -70,15 +69,16 @@ public class GUI extends PApplet {
 	public static enum Mode {start, insert, delete, search, enter, minX, minY};
 	Mode mode;
 
+	// Setup works like a constructor. It initializes the window and necessary variables.
 	public void setup() {
-		rectList = new ArrayList<Rectangle>();
 		mode = mode.start;
-
 		// Window
 		size(800, 500);
 		background(250, 250, 250, 250);
 	}
 
+	// Draw is called continuously with each frame render. It redraws everything for each render.
+	// The display changes as variables are updated.
 	public void draw() {
 		// Container
 		background(190, 190, 190, 255);
@@ -86,7 +86,6 @@ public class GUI extends PApplet {
 		stroke(contColor.getRGB(), 255);
 		strokeWeight(2);
 		rect(20, 20, 500, 450);
-
 		// Text
 		textFont(createFont("Georgia", 20));
 		textSize(20);
@@ -126,7 +125,6 @@ public class GUI extends PApplet {
 			text(minX, minX_X+12, panelMinY+45);
 			text(minY, minY_X+12, panelMinY+45);
 		}
-
 		// If not searching, draw all points
 		if (mode != mode.search && mode!=mode.minX && mode!=mode.minY) {
 			// Draw Points
@@ -151,14 +149,12 @@ public class GUI extends PApplet {
 				}
 			}
 		}
-		if(mode == mode.minX)
-		{
+		if(mode == mode.minX) {
 			Rectangle min = myTree.getMinimumX();
 			fill(0,0,15,100);
 			ellipse(min.getP1().getX(), min.getP1().getY(), 5, 5);
 		}
-		if(mode == mode.minY)
-		{
+		if(mode == mode.minY) {
 			Rectangle min = myTree.getMinimumY();
 			fill(0,0,15,100);
 			ellipse(min.getP1().getX(), min.getP1().getY(), 5, 5);
@@ -167,6 +163,8 @@ public class GUI extends PApplet {
 		setPressedColors();
 	}
 
+	// Pre: Mouse is pressed
+	// Post: Mode changed based on button press
 	public void mousePressed() {
 		if (insertClicked(mouseX, mouseY)) {
 			mode = mode.insert;
@@ -191,6 +189,8 @@ public class GUI extends PApplet {
 		modeBehavior(); 
 	}	
 
+	// Pre: Mouse must be pressed down
+	// Post: Mouse released and colors reset
 	public void mouseReleased() {
 		insertColor = regButtonColor;
 		searchColor = regButtonColor;
@@ -204,6 +204,8 @@ public class GUI extends PApplet {
 		}
 	}
 
+	// Pre: Mouse pressed down
+	// Post: Mouse dragged to change search box
 	public void mouseDragged() {
 		if (mode == mode.search) {	// Set bounds for search rectangle
 			if (contains(mouseX, mouseY, contX, contY, contWidth, contHeight)) {
@@ -232,7 +234,8 @@ public class GUI extends PApplet {
 		}
 	}
 
-	// Checks mode and applies actions
+	// Pre: Mode must be changed from start (default mode)
+	// Post: Mode changes implemented
 	private void modeBehavior() {	
 		switch (mode)	{
 		case insert:
@@ -285,28 +288,29 @@ public class GUI extends PApplet {
 		}
 	}
 
-	// Adds rectangle to the display
+	// Pre: Undrawn rectangle within R-Tree
+	// Post: Rectangle drawn to screen
 	public void drawRect(Rectangle r) {
 		noFill();
 		int x = r.p1.x;
 		int y = r.p1.y;
 		int w = r.p2.x - r.p1.x;
 		int h = r.p2.y - r.p1.y;
-
-			stroke(myColor[r.getDepth()].getRGB());	
-		
+		stroke(myColor[r.getDepth()].getRGB());	
 		rect(x, y, w, h);
 
 	}
 
-	// Draw structured Rectangle List from Algorithm
+	// Pre: Undrawn list of rectangles from RTree class
+	// Post: Each rectangle within list sent to drawRect() for drawing
 	public void drawRectangleList(){
 		for(Rectangle r:drawRectangleList) {
 			drawRect(r);
 		}
 	}
 
-	// Determines if a point exists at given coordinates
+	// Pre: Point value that may or may not exist
+	// Post: True if the point is drawn, false if not
 	public boolean pointExists(int x, int y) {
 		for (int i = 0; i < pointList.size(); i++) {
 			if (Math.pow(x - pointList.get(i).x,2) + Math.pow(y - pointList.get(i).y,2) <= 25)
@@ -315,7 +319,8 @@ public class GUI extends PApplet {
 		return false;
 	}
 
-	// Set color of pressed buttons
+	// Pre: Button was clicked on
+	// Post: Button color changed to show that it's pressed down
 	public void setPressedColors() {
 		if (mode == mode.insert)
 			insertColor = pressedColor;
@@ -332,13 +337,17 @@ public class GUI extends PApplet {
 
 	}
 
-	public ArrayList<Rectangle> getRectList() {
-		return rectList;
+	// Pre: X and Y value either inside or outside of 4 Rectangle values (x, y, width, height)
+	// Post: True if X and Y value are within Rectangle, false if not
+	public boolean contains(int x, int y, int rectX, int rectY, int rectWidth, int rectHeight) {
+		if (x > rectX && x < rectX+rectWidth && y > rectY && y < rectY+rectHeight) {
+			return true;
+		} else {
+			return false;
+		}
 	}
-
-	public void setRectList() {
-		this.rectList = rectList;
-	}
+	
+	// Clicked methods checks if the buttons are clicked, checks mouse position with button rectangles
 	public boolean insertClicked(int mouseX, int mouseY) {
 		if (contains(mouseX, mouseY, panelX, insertY, buttonWidth, buttonHeight)) {
 			return true;
@@ -381,24 +390,4 @@ public class GUI extends PApplet {
 			return false;
 		}
 	}
-	// If first two values are within rectangle bounds of last 4 values
-	public boolean contains(int x, int y, int rectX, int rectY, int rectWidth, int rectHeight) {
-		if (x > rectX && x < rectX+rectWidth && y > rectY && y < rectY+rectHeight) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	// If point given is part of the rectangle given
-	public boolean pointOfRect(Point point, Rectangle rect) {
-		if (point.x == rect.p1.x && point.y == rect.p1.y || point.x == rect.p2.x && point.y == rect.p2.y) {
-			p1 = rect.p1;
-			p2 = rect.p2;
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 }
