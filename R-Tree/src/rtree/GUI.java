@@ -8,7 +8,7 @@ public class GUI extends PApplet {
 
 
 	public static ArrayList<Rectangle> drawRectangleList = new ArrayList<Rectangle>();
-	Color [] myColor = { new Color(255, 0, 0), new Color(0, 255, 0), new Color(0, 0, 255), new Color(100,100,100), new Color(0, 250, 154), new Color(255,255,0)};
+	Color [] myColor = { new Color(255, 0, 0), new Color(0, 255, 0), new Color(0, 0, 255), new Color(100,100,100), new Color(0, 250, 154), new Color(255,255,0), new Color(133, 95, 22), new Color(23, 95, 160)};
 	RTree myTree = new RTree(3);
 
 	public static ArrayList<Rectangle> rectList;
@@ -65,8 +65,6 @@ public class GUI extends PApplet {
 	Rectangle searchSpace;	// Holds current search rectangle
 	int searchRectX;
 	int searchRectY;
-	int searchRectWidth;
-	int searchRectHeight;
 
 	// Keeps track of current mode
 	public static enum Mode {start, insert, delete, search, enter, minX, minY};
@@ -130,7 +128,7 @@ public class GUI extends PApplet {
 		}
 
 		// If not searching, draw all points
-		if (mode != mode.search&&mode!=mode.minX&&mode!=mode.minY) {
+		if (mode != mode.search && mode!=mode.minX && mode!=mode.minY) {
 			// Draw Points
 			for (Point p: pointList) {
 				fill(0, 0, 15, 100);
@@ -150,10 +148,6 @@ public class GUI extends PApplet {
 				for (Rectangle p: drawPointList) {
 					fill(0, 0, 15, 100);
 					ellipse(p.getP1().getX(), p.getP1().getY(), 5, 5);
-					//System.out.println("yay!");
-					//						noFill();
-					//						drawRect(r);
-
 				}
 			}
 		}
@@ -213,11 +207,27 @@ public class GUI extends PApplet {
 	public void mouseDragged() {
 		if (mode == mode.search) {	// Set bounds for search rectangle
 			if (contains(mouseX, mouseY, contX, contY, contWidth, contHeight)) {
-				Point p1 = new Point(searchRectX, searchRectY);
-				Point p2 = new Point(mouseX, mouseY);
-				searchRectWidth = p2.x - p1.x;
-				searchRectHeight = p2.y - p1.y;
-				searchSpace = new Rectangle(p1, p2, 0, null,null);
+				if (searchRectX < mouseX) {
+					if (searchRectY > mouseY) {
+						Point p1 = new Point(searchRectX, searchRectY);
+						Point p2 = new Point(mouseX, mouseY);
+						searchSpace = new Rectangle(p1, p2, 0, null,null);
+					} else {
+						Point p1 = new Point(searchRectX, mouseY);
+						Point p2 = new Point(mouseX, searchRectY);
+						searchSpace = new Rectangle(p1, p2, 0, null,null);
+					}
+				} else if (searchRectX > mouseX) {
+					if (searchRectY > mouseY) {
+						Point p1 = new Point(mouseX, searchRectY);
+						Point p2 = new Point(searchRectX, mouseY);
+						searchSpace = new Rectangle(p1, p2, 0, null,null);
+					} else {
+						Point p1 = new Point(mouseX, mouseY);
+						Point p2 = new Point(searchRectX, searchRectY);
+						searchSpace = new Rectangle(p1, p2, 0, null,null);
+					}
+				} 
 			}
 		}
 	}
@@ -245,14 +255,9 @@ public class GUI extends PApplet {
 						for (int j = 0; j < drawRectangleList.size(); j++) {
 							Rectangle rect = drawRectangleList.get(j);
 							if (rect.isPoint()&&rect.getP1().getX()==point.x&&rect.getP2().getY()==point.y)  { 
-								//System.out.println(rect.p1.x + "  " + rect.p1.y);
-								//drawRectangleList.remove(j);		// subject to change
 								pointList.remove(point);
-								//pointList.remove(p1);
-								//pointList.remove(p2);
 								myTree.delete(rect);
 								drawRectangleList = myTree.getRTree();
-								//pointList.remove(p2);
 							}	
 						}
 					}
@@ -262,8 +267,6 @@ public class GUI extends PApplet {
 		case search:
 			searchRectX = 0;		// Reset search rectangle values
 			searchRectY = 0;
-			searchRectWidth = 0;
-			searchRectHeight = 0;
 			if (contains(mouseX, mouseY, contX, contY, contWidth, contHeight)) {
 				searchRectX = mouseX;
 				searchRectY = mouseY;
@@ -279,10 +282,6 @@ public class GUI extends PApplet {
 			drawRectangleList = myTree.makeRTree(tempArray,1);
 			drawRectangleList();
 			break;
-
-			// MIN X CASE
-
-			// MIN Y CASE
 		}
 	}
 
